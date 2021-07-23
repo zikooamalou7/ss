@@ -4,7 +4,7 @@
   "description": "1xBet twenty One game telegram bot",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "nodemon server.js"
   },
   "author": "Pavel Zabelin",
   "license": "ISC",
@@ -13,5 +13,8 @@
     "node-telegram-bot-api": "^0.30.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
   }
 }
