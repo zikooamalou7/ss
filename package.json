@@ -6,7 +6,7 @@
   "scripts": {
     "start": "nodemon server.js"
   },
-  "author": "Pavel Zabelin",
+  "author": "Seif Elislam Hanancha",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
