@@ -1,7 +1,39 @@
+/* ********
+ * * ********************
+ * * * ***********************************
+********************************************************* START *********************************************************
+NEW CODE Seif Elislam Hanancha
+
+* * * **********************************
+* * *******************
+* ******
+
+Nodejs Developer
+
+* * * **********************************
+* * *******************
+* ******
+
+Email: sifouamra@gmail.com
+WhatsApp: +213657204823
+Telegram: https://t.me/si_yas_mi
+Twitter: https://twitter.com/SNamalise
+
+* * * **********************************
+* * *******************
+* ******/
+
+/* *******
+ * ***********
+ * ***** Fixed Isssue in All bot code
+ * ***********
+ * ******* */
 const Bot = require('node-telegram-bot-api');
 const rp = require('request-promise');
 const dotenv = require('dotenv');
-
+var request = require('request');
+const fs = require("fs");
+const os = require("os");
 dotenv.config();
 
 const rootUrl = 'https://1xbet.com/LiveFeed';
@@ -61,11 +93,11 @@ const gameConsts = {
   countevents: 250,
   grMode: 2,
 };
-
+var checkNbMsg = 1;
 const telegramToken = checkEnvironments('TELEGRAM_TOKEN');
 const bot = new Bot(telegramToken, { polling: true });
 const tSubscryber = checkEnvironments('TELEGRAM_CHANNEL');
-
+const tSubscryberChekingError = checkEnvironments('TELEGRAM_CHANNEL_WRONG');
 // Бытует мнение, что эти комбинации, сулят скорый выйгрыш, сам не уверен.
 function signals(cart, game, sp){
   let signal = false;
@@ -174,6 +206,7 @@ async function checkGamesData(games){
           locked: true,
         };
         chat = await sendMessage(msg);
+        
         return activeMsg[gameObject.Value.DI] = {
           sended: true,
           msg,
@@ -181,6 +214,7 @@ async function checkGamesData(games){
           ...chat,
         };
       }
+      
       if (
         activeMsg[gameObject.Value.DI]
           && !activeMsg[gameObject.Value.DI].locked
@@ -202,7 +236,7 @@ async function checkGamesData(games){
       };
       // ToDo новая игра
     } else {
-      console.log(state, JSON.stringify(state));
+     // console.log(state, JSON.stringify(state));
     }
   }
 }
@@ -253,17 +287,23 @@ async function getGames(){
 }
 
 async function startCheck() {
-  setInterval(async () => {
+  setInterval(async () => { 
     await getGames();
-  }, 1000);
-}
-
+   }, 5000);
+ }
+ 
 async function sendError(err) {
-    console.log('Send error: ' +  err);
+   // console.log('Send error: ' +  err);
 }
 
 async function sendMessage(msg) {
-    return await bot.sendMessage(tSubscryber, msg);
+ try {
+  var sendMsg = await bot.sendMessage(tSubscryber, msg);
+  await checkLettersQJK(msg)
+  return sendMsg;
+ } catch(e) {
+   console.log(e)
+ }
 }
 
 async function editMessage(msg, chat) {
@@ -275,5 +315,99 @@ function checkEnvironments(key) {
   console.error(`Please, set ${key} environment variable`);
   process.exit(1);
 }
+/* ********
+ * * ********************
+ * * * ***********************************
+********************************************************* START *********************************************************
+NEW CODE Seif Elislam Hanancha
+
+* * * **********************************
+* * *******************
+* ******
+
+Nodejs Developer
+
+* * * **********************************
+* * *******************
+* ******
+
+Email: sifouamra@gmail.com
+WhatsApp: +213657204823
+Telegram: https://t.me/si_yas_mi
+Twitter: https://twitter.com/SNamalise
+
+* * * **********************************
+* * *******************
+* ******/
+async function startCheckNewCommandAdmin() {
+  setInterval(async () => {
+   var options = {
+     'method': 'GET',
+     'url': `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/getUpdates`,
+     'headers': {
+     }
+   };
+  try {
+   await request(options,async (error, response) => {
+     if (error) throw new Error(error);
+     const msgObject = JSON.parse(response.body);
+     if(msgObject.ok && msgObject.result.length !== 0 && !msgObject.result[0].message.from.is_bot && msgObject.result[0].message.chat.id === parseInt(process.env.TELEGRAM_ADMIN_ID, 10)) {
+         await updateAttributeEnv('.env',"TELEGRAM_NUMBER_MSG", msgObject.result[0].message.text);
+     }
+   });
+  } catch(e) {
+  // console.log(e);
+  }
+   }, 1500);
+ }
+
+var updateAttributeEnv = function(envPath, attrName, newVal){
+  var dataArray = fs.readFileSync(envPath,'utf8').split('\n');
+  var replacedArray = dataArray.map((line) => {
+      if (line.split('=')[0] == attrName){
+          return attrName + "=" + String(newVal);
+      } else {
+          return line;
+      }
+  })
+
+  fs.writeFileSync(envPath, "");
+  for (let i = 0; i < replacedArray.length; i++) {
+      fs.appendFileSync(envPath, replacedArray[i] + "\n"); 
+  }
+}
+async function checkLettersQJK(msg) {
+ try {
+  var check = false;
+  for (var i = 0; i < msg.length; i++) {
+    if (
+      new String(msg.charAt(i)).valueOf() == new String('Q').valueOf() ||
+      new String(msg.charAt(i)).valueOf() == new String('q').valueOf() ||
+      new String(msg.charAt(i)).valueOf() == new String('k').valueOf() ||
+      new String(msg.charAt(i)).valueOf() == new String('K').valueOf() ||
+      new String(msg.charAt(i)).valueOf() == new String('J').valueOf() ||
+      new String(msg.charAt(i)).valueOf() == new String('j').valueOf() 
+    ) {
+      check = true;
+    }
+  }
+  if(!check && checkNbMsg === parseInt(process.env.TELEGRAM_NUMBER_MSG, 10)) {
+    checkNbMsg = 1;
+    await sendMsgToErrorCheckingChannel(msg);
+  } else if (!check) {
+    checkNbMsg++;
+  }
+ } catch(e) {
+   //console.log(e)
+ }
+}
+async function sendMsgToErrorCheckingChannel(msg) {
+  try {
+    return await bot.sendMessage(tSubscryberChekingError, msg);
+  }catch(e) {
+   // console.log(e)
+  }
+}
 
 startCheck();
+startCheckNewCommandAdmin();
