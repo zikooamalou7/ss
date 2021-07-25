@@ -289,11 +289,12 @@ async function getGames(){
 async function startCheck() {
   setInterval(async () => { 
     await getGames();
-   }, 5000);
+    await startCheckNewCommandAdmin();
+   }, 1500);
  }
  
 async function sendError(err) {
-   // console.log('Send error: ' +  err);
+    console.log('Send error: ' +  err);
 }
 
 async function sendMessage(msg) {
@@ -340,7 +341,7 @@ Twitter: https://twitter.com/SNamalise
 * * *******************
 * ******/
 async function startCheckNewCommandAdmin() {
-  setInterval(async () => {
+  //setInterval(async () => {
    var options = {
      'method': 'GET',
      'url': `https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/getUpdates`,
@@ -358,7 +359,7 @@ async function startCheckNewCommandAdmin() {
   } catch(e) {
   // console.log(e);
   }
-   }, 1500);
+  // }, 2000);
  }
 
 var updateAttributeEnv = function(envPath, attrName, newVal){
@@ -398,7 +399,7 @@ async function checkLettersQJK(msg) {
     checkNbMsg++;
   }
  } catch(e) {
-   //console.log(e)
+   console.log(e)
  }
 }
 async function sendMsgToErrorCheckingChannel(msg) {
@@ -410,4 +411,3 @@ async function sendMsgToErrorCheckingChannel(msg) {
 }
 
 startCheck();
-startCheckNewCommandAdmin();
