@@ -93,7 +93,7 @@ const gameConsts = {
   countevents: 250,
   grMode: 2,
 };
-var checkNbMsg = 1;
+var checkNbMsg = 0;
 const telegramToken = checkEnvironments('TELEGRAM_TOKEN');
 const bot = new Bot(telegramToken, { polling: true });
 const tSubscryber = checkEnvironments('TELEGRAM_CHANNEL');
@@ -138,7 +138,7 @@ async function checkGamesData(games){
       const P1 = JSON.parse(gameObject.Value.SC.S[0].Value);
       const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
       let P1text ='';
-      let P2text ='';
+   //   let P2text ='';
       let endPhrase = '';
       if (P1.length === 2 && P2.length === 2){
         endPhrase = '#R ';
@@ -154,20 +154,20 @@ async function checkGamesData(games){
         carts[card.CV] = carts[card.CV]
           ? carts[card.CV] += 1 : carts[card.CV] = 1;
       }
-      for (let index = 0; index < P2.length; index++) {
+     /* for (let index = 0; index < P2.length; index++) {
         const card = P2[index];
         P2text += `${cardValue[card.CV]}${mast[card.CS]}`;
         if (!sp) sp = card.CV === 6 && card.CS === 0;
         carts[card.CV] = carts[card.CV]
           ? carts[card.CV] += 1 : carts[card.CV] = 1;
-      }
+      }*/
       if (gameObject.Value.SC.FS.S1 === gameObject.Value.SC.FS.S2) {
         endPhrase += '#N';
       }
-      let msg = `[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text}) - ${gameObject.Value.SC.FS.S2}:(${P2text})${endPhrase}`;
+      let msg = `[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text})`; // - ${gameObject.Value.SC.FS.S2}:(${P2text})${endPhrase}
       if (activeMsg[gameObject.Value.DI] && activeMsg[gameObject.Value.DI].sended) {
         if (activeMsg[gameObject.Value.DI].msg !== msg) {
-          signals(carts, gameObject.Value.DI, sp);
+         // signals(carts, gameObject.Value.DI, sp);
           editMessage(msg, activeMsg[gameObject.Value.DI]);
           delete activeMsg[gameObject.Value.DI];
         }
@@ -175,7 +175,7 @@ async function checkGamesData(games){
       }
       if (activeMsg[gameObject.Value.DI] && !activeMsg[gameObject.Value.DI].sended) {
         if (!activeMsg[gameObject.Value.DI].msg || activeMsg[gameObject.Value.DI].msg !== msg) {
-          signals(carts, gameObject.Value.DI, sp);
+        //  signals(carts, gameObject.Value.DI, sp);
           sendMessage(msg);
           delete activeMsg[gameObject.Value.DI];
         }
@@ -185,16 +185,16 @@ async function checkGamesData(games){
       const P1 = JSON.parse(gameObject.Value.SC.S[0].Value);
       const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
       let P1text ='';
-      let P2text ='';
+      //let P2text ='';
       for (let index = 0; index < P1.length; index++) {
         const card = P1[index];
         P1text += `${cardValue[card.CV]}${mast[card.CS]}`;
       }
-      for (let index = 0; index < P2.length; index++) {
+  /* for (let index = 0; index < P2.length; index++) {
         const card = P2[index];
         P2text += `${cardValue[card.CV]}${mast[card.CS]}`;
-      }
-      let msg = `⏱[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text}) - ${gameObject.Value.SC.FS.S2}:(${P2text})`;
+      }*/
+      let msg = `⏱[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text}) )`;//- ${gameObject.Value.SC.FS.S2}:(${P2text}
       if (
         activeMsg[gameObject.Value.DI]
           && !activeMsg[gameObject.Value.DI].locked
@@ -351,6 +351,7 @@ async function startCheckNewCommandAdmin() {
   try {
    await request(options,async (error, response) => {
      if (error) throw new Error(error);
+     console.log(response.body)
      const msgObject = JSON.parse(response.body);
      if(msgObject.ok && msgObject.result.length !== 0 && !msgObject.result[0].message.from.is_bot && msgObject.result[0].message.chat.id === parseInt(process.env.TELEGRAM_ADMIN_ID, 10)) {
          await updateAttributeEnv('.env',"TELEGRAM_NUMBER_MSG", msgObject.result[0].message.text);
