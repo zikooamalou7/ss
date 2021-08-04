@@ -33,7 +33,6 @@ const rp = require('request-promise');
 const dotenv = require('dotenv');
 var request = require('request');
 const fs = require("fs");
-const os = require("os");
 dotenv.config();
 
 const rootUrl = 'https://1xbet.com/LiveFeed';
@@ -76,6 +75,7 @@ const cardValue = {
   14: 'A',
 };
 
+
 const gamesConsts = {
   sports: 146,
   count: 100,
@@ -93,12 +93,25 @@ const gameConsts = {
   countevents: 250,
   grMode: 2,
 };
-var checkNbMsg = 0;
+var KcheckNbMsg = 0;
+var QcheckNbMsg = 0;
+var JcheckNbMsg = 0;
+var KLatter = true;
+var QLatter = true;
+var JLatter = true;
+var KLatterTester = false;
+var QLatterTester = false;
+var JLatterTester = false;
+var KLatterTesterSender = false;
+var QLatterTesterSender = false;
+var JLatterTesterSender = false;
+var CheckLastMessage = -1;
 const telegramToken = checkEnvironments('TELEGRAM_TOKEN');
 const bot = new Bot(telegramToken, { polling: true });
 const tSubscryber = checkEnvironments('TELEGRAM_CHANNEL');
 const tSubscryberChekingError = checkEnvironments('TELEGRAM_CHANNEL_WRONG');
 // Бытует мнение, что эти комбинации, сулят скорый выйгрыш, сам не уверен.
+/*
 function signals(cart, game, sp){
   let signal = false;
   let signalMsg = `[${game}] Сигнал: `;
@@ -125,18 +138,18 @@ function signals(cart, game, sp){
     signalMsg += 'король,10; ';
   }
   if (signal) sendMessage(signalMsg);
-}
+}*/
 
 async function checkGamesData(games){
   const game = await checkGame(games.I);
   if (!game) return null;
   const gameObject = JSON.parse(game);
-
+ // console.log(gameObject)
   if (gameObject.Value) {
     const state = gameObject.Value.SC.S[2].Value;
     if (['3','4','5'].includes(state)) {
       const P1 = JSON.parse(gameObject.Value.SC.S[0].Value);
-      const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
+    //  const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
       let P1text ='';
    //   let P2text ='';
       let endPhrase = '';
@@ -154,6 +167,10 @@ async function checkGamesData(games){
         carts[card.CV] = carts[card.CV]
           ? carts[card.CV] += 1 : carts[card.CV] = 1;
       }
+
+      console.log("/***** Start P1text ********/")
+      console.log(P1text)
+      console.log("/***** End P1text ********/")
      /* for (let index = 0; index < P2.length; index++) {
         const card = P2[index];
         P2text += `${cardValue[card.CV]}${mast[card.CS]}`;
@@ -164,7 +181,8 @@ async function checkGamesData(games){
       if (gameObject.Value.SC.FS.S1 === gameObject.Value.SC.FS.S2) {
         endPhrase += '#N';
       }
-      let msg = `[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text})`; // - ${gameObject.Value.SC.FS.S2}:(${P2text})${endPhrase}
+     // console.log(gameObject)
+      let msg = `[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text})`; // :(${P2text})${endPhrase}
       if (activeMsg[gameObject.Value.DI] && activeMsg[gameObject.Value.DI].sended) {
         if (activeMsg[gameObject.Value.DI].msg !== msg) {
          // signals(carts, gameObject.Value.DI, sp);
@@ -176,14 +194,31 @@ async function checkGamesData(games){
       if (activeMsg[gameObject.Value.DI] && !activeMsg[gameObject.Value.DI].sended) {
         if (!activeMsg[gameObject.Value.DI].msg || activeMsg[gameObject.Value.DI].msg !== msg) {
         //  signals(carts, gameObject.Value.DI, sp);
-          sendMessage(msg);
+        if(gameObject.Value.DI !== CheckLastMessage) {
+          CheckLastMessage = gameObject.Value.DI;
+          console.log(gameObject)
+
+          console.log('/** Before **/')
+           console.log(msg.length)
+           console.log(msg)
+           console.log('/** Before **/')
+           await sendMessage(msg);
+          /* console.log('/** 1-2 ** /')
+           console.log(msg.length)
+           console.log(msg)
+           console.log('/** 1-2 ** /')*/
+         //  await checkLettersQJK(msg)
+        } else {
+          CheckLastMessage = gameObject.Value.DI;
+        }
+          
           delete activeMsg[gameObject.Value.DI];
         }
         return null;
       }
     } else if (['1','2'].includes(state)) {
       const P1 = JSON.parse(gameObject.Value.SC.S[0].Value);
-      const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
+      //const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
       let P1text ='';
       //let P2text ='';
       for (let index = 0; index < P1.length; index++) {
@@ -194,7 +229,12 @@ async function checkGamesData(games){
         const card = P2[index];
         P2text += `${cardValue[card.CV]}${mast[card.CS]}`;
       }*/
-      let msg = `⏱[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text}) )`;//- ${gameObject.Value.SC.FS.S2}:(${P2text}
+      let msg = `⏱[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text}))`;//- ${gameObject.Value.SC.FS.S2}:(${P2text}
+      /*********************************
+       * 
+       * New code
+       */
+     
       if (
         activeMsg[gameObject.Value.DI]
           && !activeMsg[gameObject.Value.DI].locked
@@ -205,8 +245,16 @@ async function checkGamesData(games){
           msg,
           locked: true,
         };
-        chat = await sendMessage(msg);
-        
+        //console.log(typeof gameObject.Value.DI)
+        if(gameObject.Value.DI !== CheckLastMessage) {
+          console.log('/** Before **/')
+          console.log(msg.length)
+          console.log(msg)
+          console.log('/** Before **/')
+          chat = await sendMessage(msg);
+        } else {
+          CheckLastMessage = gameObject.Value.DI;
+        }
         return activeMsg[gameObject.Value.DI] = {
           sended: true,
           msg,
@@ -288,22 +336,57 @@ async function getGames(){
 
 async function startCheck() {
   setInterval(async () => { 
-    await getGames();
-    await startCheckNewCommandAdmin();
-   }, 1500);
+   // await sendMessage('[2]: 23:(J♠️7♥️K♠️10♦️)');
+   await getGames();
+   await startCheckNewCommandAdmin();
+  }, 1500);
+  /* let all = [
+     "K",
+     "Q",
+     "A",
+     "A",
+     "J",
+     "A Q",
+     "A",
+     "A",
+     "K",
+     "J",
+     "Q J K",
+     "Q",
+     "Q",
+     "Q J K",
+     "Q A K",
+     "A",
+     "A",
+     "A",
+     "Q",
+     "Q A j",
+   ]
+   for(let a of all) {
+   await sendMessage(a);
+   }*/
  }
  
 async function sendError(err) {
-    console.log('Send error: ' +  err);
+ //   console.log('Send error: ' +  err);
 }
 
 async function sendMessage(msg) {
  try {
-  var sendMsg = await bot.sendMessage(tSubscryber, msg);
+ /* console.log('/** 1 ** /')
+  console.log(msg.length)
+  console.log(msg)
+  console.log('/** 1 ** /')
+  await checkLettersQJK(msg)*/
+  console.log('/** 1-1 **/')
+  console.log(msg.length)
+  console.log(msg)
+  console.log('/** 1-1 **/')
+ var sendMsg = await bot.sendMessage(tSubscryber, msg);
   await checkLettersQJK(msg)
   return sendMsg;
  } catch(e) {
-   console.log(e)
+  // console.log(e)
  }
 }
 
@@ -351,7 +434,7 @@ async function startCheckNewCommandAdmin() {
   try {
    await request(options,async (error, response) => {
      if (error) throw new Error(error);
-     console.log(response.body)
+  //   console.log(response.body)
      const msgObject = JSON.parse(response.body);
      if(msgObject.ok && msgObject.result.length !== 0 && !msgObject.result[0].message.from.is_bot && msgObject.result[0].message.chat.id === parseInt(process.env.TELEGRAM_ADMIN_ID, 10)) {
          await updateAttributeEnv('.env',"TELEGRAM_NUMBER_MSG", msgObject.result[0].message.text);
@@ -380,27 +463,138 @@ var updateAttributeEnv = function(envPath, attrName, newVal){
 }
 async function checkLettersQJK(msg) {
  try {
-  var check = false;
+  console.log('/** 2 **/')
+  console.log(msg.length)
+  console.log(msg)
+  console.log('/** 2 **/')
   for (var i = 0; i < msg.length; i++) {
     if (
       new String(msg.charAt(i)).valueOf() == new String('Q').valueOf() ||
-      new String(msg.charAt(i)).valueOf() == new String('q').valueOf() ||
+      new String(msg.charAt(i)).valueOf() == new String('q').valueOf() 
+    ) {
+      QLatter = true;
+      QLatterTester = true;
+      QcheckNbMsg = 0;
+    }
+    else {
+      QLatter = false;
+    }
+     if (
       new String(msg.charAt(i)).valueOf() == new String('k').valueOf() ||
-      new String(msg.charAt(i)).valueOf() == new String('K').valueOf() ||
+      new String(msg.charAt(i)).valueOf() == new String('K').valueOf() 
+    ) {
+      KLatter = true;
+      KLatterTester = true;
+      KcheckNbMsg = 0;
+    } 
+    else {
+      KLatter = false;
+    }
+     if (
       new String(msg.charAt(i)).valueOf() == new String('J').valueOf() ||
       new String(msg.charAt(i)).valueOf() == new String('j').valueOf() 
     ) {
-      check = true;
+      JLatter = true;
+      JLatterTester = true;
+      JcheckNbMsg = 0;
+    }
+    else {
+      JLatter = false;
     }
   }
-  if(!check && checkNbMsg === parseInt(process.env.TELEGRAM_NUMBER_MSG, 10)) {
-    checkNbMsg = 1;
-    await sendMsgToErrorCheckingChannel(msg);
-  } else if (!check) {
-    checkNbMsg++;
-  }
+  var msgToWrongChannel = '';
+  /*console.log(!QLatter);
+  console.log(QLatterTester);
+  console.log(QcheckNbMsg);*/
+  if(!QLatter && QLatterTester && QcheckNbMsg === parseInt(process.env.TELEGRAM_NUMBER_MSG, 10)) {
+    QLatterTesterSender = true;
+    msgToWrongChannel += 'Q';
+   } else if(QLatterTester){
+    QcheckNbMsg++;
+   }
+  if(!JLatter && JLatterTester && JcheckNbMsg === parseInt(process.env.TELEGRAM_NUMBER_MSG, 10)) {
+    JLatterTesterSender = true;
+    msgToWrongChannel += ' J';
+   } else if(JLatterTester){
+    JcheckNbMsg++;
+   }
+   if(!KLatter && KLatterTester && KcheckNbMsg === parseInt(process.env.TELEGRAM_NUMBER_MSG, 10)) {
+    KLatterTesterSender = true;
+    msgToWrongChannel += ' K';
+   } else if( KLatterTester){
+    KcheckNbMsg++;
+   }
+   msgToWrongChannel += '.. Not Found 😭😭';
+   
+ if(KLatterTesterSender) {
+    KLatterTesterSender = false;
+    KLatterTester = false;
+    KcheckNbMsg = 0;
+    if (QLatterTesterSender) {
+      QLatterTesterSender = false;
+      QcheckNbMsg = 0;
+      QLatterTester = false;
+     }
+      if(JLatterTesterSender) {
+      JLatterTesterSender = false;
+      JcheckNbMsg = 0;
+      JLatterTester = false;
+     }
+    await sendMsgToErrorCheckingChannel(msgToWrongChannel);
+   } else if (QLatterTesterSender) {
+    QLatterTesterSender = false;
+    QcheckNbMsg = 0;
+    QLatterTester = false;
+    
+   if(KLatterTesterSender) {
+      KLatterTesterSender = false;
+      KLatterTester = false;
+      KcheckNbMsg = 0;
+    }
+    if(JLatterTesterSender) {
+      JLatterTesterSender = false;
+      JcheckNbMsg = 0;
+      JLatterTester = false;
+     }
+    await sendMsgToErrorCheckingChannel(msgToWrongChannel);
+   }  else if(JLatterTesterSender) {
+    JLatterTesterSender = false;
+    JcheckNbMsg = 0;
+    JLatterTester = false;
+    if(KLatterTesterSender) {
+      KLatterTesterSender = false;
+      KLatterTester = false;
+      KcheckNbMsg = 0;
+    }
+    if (QLatterTesterSender) {
+      QLatterTesterSender = false;
+      QcheckNbMsg = 0;
+      QLatterTester = false;
+     }
+    await sendMsgToErrorCheckingChannel(msgToWrongChannel);
+   }
+ /* console.log('/********* JLatter ********* /')
+  console.log(JLatter);
+  console.log('/********* JLatterTester ********* /')
+  console.log(JLatterTester);
+  console.log('/********* JcheckNbMsg ********* /')
+  console.log(JcheckNbMsg);
+  console.log('/********* QLatter ********* /')*/
+  /*console.log(QLatter);
+  console.log('/********* QLatterTester ********* /')
+  console.log(QLatterTester);
+  console.log('/********* QcheckNbMsg ********* /')
+  console.log(QcheckNbMsg);*/
+ /* console.log('/********* KLatter ********* /')
+  console.log(KLatter);
+  console.log('/********* KLatterTester ********* /')
+  console.log(KLatterTester);
+  console.log('/********* KcheckNbMsg ********* /')
+  console.log(KcheckNbMsg);
+  console.log('/********* msgToWrongChannel ********* /')*/
+ // console.log(msgToWrongChannel);
  } catch(e) {
-   console.log(e)
+  // console.log(e)
  }
 }
 async function sendMsgToErrorCheckingChannel(msg) {
