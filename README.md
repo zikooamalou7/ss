@@ -1,10 +1,8 @@
-This is bot checks 1xbet twenty one game and send it to the telegram channel.
-After start it sends to channel real time games statistics. (see image)
-![telegram 1xbet twenty one](https://raw.githubusercontent.com/PZBird/1xbet-twenty-one-bot/master/channel.jpg)
+
 
 ## To run bot:
 1. Create .env file
-2. Set TELEGRAM_TOKEN and TELEGRAM_CHANNEL in it
+2. Set TELEGRAM_TOKEN , TELEGRAM_CHANNEL , TELEGRAM_CHANNEL_WRONG and TELEGRAM_ADMIN_ID in it
 3. Start bot:
   * With docker
     ```
