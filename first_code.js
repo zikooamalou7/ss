@@ -144,14 +144,14 @@ async function checkGamesData(games){
   const game = await checkGame(games.I);
   if (!game) return null;
   const gameObject = JSON.parse(game);
- // console.log(gameObject)
+  //console.log(gameObject)
   if (gameObject.Value) {
     const state = gameObject.Value.SC.S[2].Value;
     if (['3','4','5'].includes(state)) {
       const P1 = JSON.parse(gameObject.Value.SC.S[0].Value);
-    //  const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
-      let P1text ='';
-   //   let P2text ='';
+      const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
+      var P1text ='';
+      let P2text ='';
       let endPhrase = '';
       if (P1.length === 2 && P2.length === 2){
         endPhrase = '#R ';
@@ -159,7 +159,7 @@ async function checkGamesData(games){
         if (P2[0].CV === P2[1].CV && P2[1].CV === 14) endPhrase += '#G ';
       }
       const carts = {};
-      let sp = false;
+      var sp = false;
       for (let index = 0; index < P1.length; index++) {
         const card = P1[index];
         P1text += `${cardValue[card.CV]}${mast[card.CS]}`;
@@ -168,25 +168,29 @@ async function checkGamesData(games){
           ? carts[card.CV] += 1 : carts[card.CV] = 1;
       }
 
-      console.log("/***** Start P1text ********/")
+      /*console.log("/***** Start P1text ******** /")
       console.log(P1text)
-      console.log("/***** End P1text ********/")
-     /* for (let index = 0; index < P2.length; index++) {
+      console.log("/***** End P1text ******** /")*/
+      for (let index = 0; index < P2.length; index++) {
         const card = P2[index];
         P2text += `${cardValue[card.CV]}${mast[card.CS]}`;
         if (!sp) sp = card.CV === 6 && card.CS === 0;
         carts[card.CV] = carts[card.CV]
           ? carts[card.CV] += 1 : carts[card.CV] = 1;
-      }*/
+      }
       if (gameObject.Value.SC.FS.S1 === gameObject.Value.SC.FS.S2) {
         endPhrase += '#N';
       }
      // console.log(gameObject)
-      let msg = `[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text})`; // :(${P2text})${endPhrase}
+     const msg = `[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text})`;// - ${gameObject.Value.SC.FS.S2}:(${P2text})${endPhrase}
+     /* console.log('/** Before ** /')
+      console.log(msg.length);
+      console.log(msg);
+      console.log('/** Before ** /')*/
       if (activeMsg[gameObject.Value.DI] && activeMsg[gameObject.Value.DI].sended) {
         if (activeMsg[gameObject.Value.DI].msg !== msg) {
          // signals(carts, gameObject.Value.DI, sp);
-          editMessage(msg, activeMsg[gameObject.Value.DI]);
+         await editMessage(msg, activeMsg[gameObject.Value.DI]);
           delete activeMsg[gameObject.Value.DI];
         }
         return null;
@@ -194,15 +198,20 @@ async function checkGamesData(games){
       if (activeMsg[gameObject.Value.DI] && !activeMsg[gameObject.Value.DI].sended) {
         if (!activeMsg[gameObject.Value.DI].msg || activeMsg[gameObject.Value.DI].msg !== msg) {
         //  signals(carts, gameObject.Value.DI, sp);
+      //  onsole.log("gameObject.Value.SC.TS", gameObject.Value.SC.TS)
+        //  && (gameObject.Value.SC.TS === 25 || ameObject.Value.SC.TS === 25)
         if(gameObject.Value.DI !== CheckLastMessage) {
           CheckLastMessage = gameObject.Value.DI;
-          console.log(gameObject)
-
-          console.log('/** Before **/')
+        /* console.log(gameObject)
+           console.log('/** Before ** /')
            console.log(msg.length)
            console.log(msg)
-           console.log('/** Before **/')
+           console.log('/** Before ** /')*/
            await sendMessage(msg);
+           await checkLettersQJK(msg);
+           
+           //await checkLettersQJK(msg);
+          // await testMsg(msg);
           /* console.log('/** 1-2 ** /')
            console.log(msg.length)
            console.log(msg)
@@ -218,22 +227,28 @@ async function checkGamesData(games){
       }
     } else if (['1','2'].includes(state)) {
       const P1 = JSON.parse(gameObject.Value.SC.S[0].Value);
-      //const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
-      let P1text ='';
-      //let P2text ='';
+      const P2 = JSON.parse(gameObject.Value.SC.S[1].Value);
+      var P1text ='';
+      let P2text ='';
       for (let index = 0; index < P1.length; index++) {
         const card = P1[index];
         P1text += `${cardValue[card.CV]}${mast[card.CS]}`;
       }
-  /* for (let index = 0; index < P2.length; index++) {
+     for (let index = 0; index < P2.length; index++) {
         const card = P2[index];
         P2text += `${cardValue[card.CV]}${mast[card.CS]}`;
-      }*/
-      let msg = `⏱[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text}))`;//- ${gameObject.Value.SC.FS.S2}:(${P2text}
+      }
+      const msg = `⏱[${gameObject.Value.DI}]: ${gameObject.Value.SC.FS.S1}:(${P1text}))`;// - ${gameObject.Value.SC.FS.S2}:(${P2text}
       /*********************************
        * 
        * New code
        */
+      /*
+        console.log('/** Before ** /')
+        console.log(msg.length);
+        console.log(msg);
+        console.log('/** Before ** /')
+      */
      
       if (
         activeMsg[gameObject.Value.DI]
@@ -245,13 +260,21 @@ async function checkGamesData(games){
           msg,
           locked: true,
         };
-        //console.log(typeof gameObject.Value.DI)
+  //  console.log("gameObject.Value.SC.TS: ", gameObject.Value.SC.TS)
+        //&& (gameObject.Value.SC.TS === 23 || gameObject.Value.SC.TS === 28 || gameObject.Value.SC.TS === 26)
         if(gameObject.Value.DI !== CheckLastMessage) {
-          console.log('/** Before **/')
+          CheckLastMessage = gameObject.Value.DI;
+         /* console.log('/** Before ** /')
           console.log(msg.length)
           console.log(msg)
-          console.log('/** Before **/')
+          console.log('/** Before ** /')
           chat = await sendMessage(msg);
+          console.log('/**************************************************** Before ** /')
+          console.log(chat)
+          console.log('/**************************************************** Before ** /')*/
+         // await testMsg(msg);
+         chat = await sendMessage(msg);
+        // await checkLettersQJK(msg);
         } else {
           CheckLastMessage = gameObject.Value.DI;
         }
@@ -268,7 +291,7 @@ async function checkGamesData(games){
           && !activeMsg[gameObject.Value.DI].locked
           && activeMsg[gameObject.Value.DI].sended) {
         if (activeMsg[gameObject.Value.DI].msg === msg) return;
-        editMessage(msg, activeMsg[gameObject.Value.DI]);
+        await editMessage(msg, activeMsg[gameObject.Value.DI]);
         return activeMsg[gameObject.Value.DI] = {
           ...activeMsg[gameObject.Value.DI],
           sended: true,
@@ -339,7 +362,7 @@ async function startCheck() {
    // await sendMessage('[2]: 23:(J♠️7♥️K♠️10♦️)');
    await getGames();
    await startCheckNewCommandAdmin();
-  }, 1500);
+  }, 4000);
   /* let all = [
      "K",
      "Q",
@@ -378,12 +401,12 @@ async function sendMessage(msg) {
   console.log(msg)
   console.log('/** 1 ** /')
   await checkLettersQJK(msg)*/
-  console.log('/** 1-1 **/')
+  console.log('/** 1-1 ** /')
   console.log(msg.length)
   console.log(msg)
-  console.log('/** 1-1 **/')
+  console.log('/** 1-1 ** /')
  var sendMsg = await bot.sendMessage(tSubscryber, msg);
-  await checkLettersQJK(msg)
+ 
   return sendMsg;
  } catch(e) {
   // console.log(e)
@@ -606,3 +629,9 @@ async function sendMsgToErrorCheckingChannel(msg) {
 }
 
 startCheck();
+
+function testMsg(msg) {
+  console.log("/************ check *******************/");
+  console.log(msg)
+  console.log("/************ check *******************/");
+}
